@@ -4,7 +4,8 @@ A simple nice-looking maze interface to play with, including various themes.
 
 ## Concept
 
-The maze is basically a rectangle filled with emojis.
+The maze is basically a rectangle filled with emojis. 
+When clicking on 'Search' button, the algorithm will search for the shortest path from the lead to the target.
 
 Maze parameters that can be changed through the interface:
 
@@ -13,6 +14,8 @@ Maze parameters that can be changed through the interface:
 * The theme
 
 ## Screenshots
+
+Below are some screenshots of the interface:
 
 ![Screenshot_1](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture1.png)
 

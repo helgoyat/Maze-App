@@ -186,34 +186,41 @@ class App extends Component
         this.setState({ pot, ...this.initialState, solutions: [] });
     }
 
-    changeSize(operator, type)
+    changeSize(value)
     {
         const { pot } = this.state;
+
         const height = pot.length;
         const width = pot[0].length;
-        // ROW
-        if (type === 'row')
+
+        switch (value)
         {
-            if (operator === 'plus' && (height < 7))
-            {
-                this.generateRandomMaze(width, (height + 1));
-            }
-            if ((operator === 'minus') && (height > 2))
-            {
-                this.generateRandomMaze(width, (height - 1));
-            }
-        }
-        // COLUMN
-        if (type === 'col')
-        {
-            if (operator === 'plus' && (width < 7))
-            {
-                this.generateRandomMaze((width + 1), height);
-            }
-            if ((operator === 'minus') && (width > 2))
-            {
-                this.generateRandomMaze((width - 1), height);
-            }
+            case 0:
+                if (height > window.$minSize)
+                {
+                    this.generateRandomMaze(width, (height - 1));
+                }
+                break;
+            case 1:
+                if (height < window.$maxSize)
+                {
+                    this.generateRandomMaze(width, (height + 1));
+                }
+                break;
+            case 2:
+                if (width > window.$minSize)
+                {
+                    this.generateRandomMaze((width - 1), height);
+                }
+                break;
+            case 3:
+                if (width < window.$maxSize)
+                {
+                    this.generateRandomMaze((width + 1), height);
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -238,10 +245,23 @@ class App extends Component
 
     render()
     {
-        const { pot, start, target, solution, isSolved, isSearchBtn, animalCursor, themes, activeTheme, isAnimation, isGenerated } = this.state;
+        const {
+            pot,
+            start,
+            target,
+            solution,
+            isSolved,
+            isSearchBtn,
+            animalCursor,
+            themes,
+            activeTheme,
+            isAnimation,
+            isGenerated
+        } = this.state;
 
         const theme = themes[activeTheme];
-        const background = `linear-gradient(0deg, #272727 40%, #181818 50%, ${theme.color.third} 30%, ${theme.color.secondary} 80%)`;
+        const background = `linear-gradient(0deg, #272727 40%, #181818 50%, ` +
+            `${theme.color.third} 30%, ${theme.color.secondary} 80%)`;
 
         return (
             <div className="App" style={{ background }}>
@@ -265,15 +285,15 @@ class App extends Component
                                                     let obstacle = theme.emoji.obstacle_1;
                                                     switch (e)
                                                     {
-                                                    case 2:
-                                                        obstacle = theme.emoji.obstacle_2;
-                                                        break;
-                                                    case 3:
-                                                        obstacle = theme.emoji.obstacle_3;
-                                                        break;
-                                                    default:
-                                                        obstacle = theme.emoji.obstacle_1;
-                                                        break;
+                                                        case 2:
+                                                            obstacle = theme.emoji.obstacle_2;
+                                                            break;
+                                                        case 3:
+                                                            obstacle = theme.emoji.obstacle_3;
+                                                            break;
+                                                        default:
+                                                            obstacle = theme.emoji.obstacle_1;
+                                                            break;
                                                     }
 
                                                     return (
