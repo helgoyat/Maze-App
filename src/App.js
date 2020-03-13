@@ -32,7 +32,7 @@ class App extends Component
             themes: Themes,
             activeTheme: 0,
         };
-        this.generateRandomMaze = this.generateRandomMaze.bind(this);
+        this.generateMaze = this.generateMaze.bind(this);
         this.calculatePath = this.calculatePath.bind(this);
         this.searchPath = this.searchPath.bind(this);
         this.changeBlockType = this.changeBlockType.bind(this);
@@ -42,42 +42,75 @@ class App extends Component
 
     componentDidMount()
     {
-        this.generateRandomMaze(5, 5);
+        // Generate a square maze (5 by 5)
+        this.generateMaze(5, 5);
     }
 
-    generateRandomMaze(width, height)
+    /**
+     * Generate random number 
+     * from 0 (included) to limit (excluded)
+     * @param {int} limit 
+     */
+    random(limit)
     {
-        this.setState({ ...this.initialState, ...this.initialMaze, solutions: [] }, () =>
+        return Math.floor(Math.random() * limit);
+    }
+
+    /**
+     * Generate Maze with set width and height
+     * Fill maze with random number for UI representation
+     * Set start and target points
+     * @param {int} width 
+     * @param {int} height 
+     */
+    generateMaze(width, height)
+    {
+        // Reset previous maze values
+        this.setState({ ...this.initialState, ...this.initialMaze }, () =>
         {
-            // Create array with width and height and only filled with 10
+            // Declare and assign a 2D array
             const array = [[]];
-            for (let i = 0; i < width; i++)
+
+            // Fill with values 0
+            for (let i = 0; i < width; ++i)
             {
-                array[0].push(10);
+                array[0].push(0);
             }
-            for (let i = 1; i < height; i++)
+            for (let i = 1; i < height; ++i)
             {
                 array.push(array[0]);
             }
-            // Randomly assigns numbers
-            const pot = array.map(row => row.map(() => Math.floor(Math.random() * 4)));
-            // Create random start and target points
+
+            // Create pot and assign in 2D array 
+            // random values in range [0-3]
+            const pot = array.map(row => row.map(() => this.random(4)));
+
+            // Create start and target points
             const start = {
-                row: Math.floor(Math.random() * height),
-                col: Math.floor(Math.random() * width)
+                row: this.random(height),
+                col: this.random(width)
             };
             const target = {};
             do
             {
-                target.row = Math.floor(Math.random() * height);
-                target.col = Math.floor(Math.random() * width);
+                target.row = this.random(height);
+                target.col = this.random(width);
             }
             while ((target.row === start.row) || (target.col === start.col));
-            // Change pot start and target values to 0
+
+            // Change the pot's start and target locations values to 0
+            // i.e. make sure both start and target points
+            // are placed on a 'path' (and not on an 'obstacle')
             pot[start.row][start.col] = 0;
             pot[target.row][target.col] = 0;
 
-            this.setState({ pot, start, target, isGenerated: true });
+            // Set state with results
+            this.setState({
+                pot,
+                start,
+                target,
+                isGenerated: true
+            });
         });
     }
 
@@ -198,25 +231,25 @@ class App extends Component
             case 0:
                 if (height > window.$minSize)
                 {
-                    this.generateRandomMaze(width, (height - 1));
+                    this.generateMaze(width, (height - 1));
                 }
                 break;
             case 1:
                 if (height < window.$maxSize)
                 {
-                    this.generateRandomMaze(width, (height + 1));
+                    this.generateMaze(width, (height + 1));
                 }
                 break;
             case 2:
                 if (width > window.$minSize)
                 {
-                    this.generateRandomMaze((width - 1), height);
+                    this.generateMaze((width - 1), height);
                 }
                 break;
             case 3:
                 if (width < window.$maxSize)
                 {
-                    this.generateRandomMaze((width + 1), height);
+                    this.generateMaze((width + 1), height);
                 }
                 break;
             default:
