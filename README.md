@@ -14,8 +14,8 @@ Maze parameters that can be changed through the interface:
 
 ## Screenshots
 
-![Screenshot_1](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture_1.PNG)
+![Screenshot_1](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture1.png)
 
-![Screenshot_2](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture_2.PNG)
+![Screenshot_2](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture2.png)
 
-![Screenshot_3](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture_3.PNG)
+![Screenshot_3](https://github.com/helgoyat/maze-game/blob/master/screenshots/capture3.png)
