@@ -13,22 +13,22 @@ class App extends Component
     {
         super();
         this.initialMaze = {
-            pot: null,
+            maze: null,
             start: { row: 0, col: 0 },
             target: { row: 0, col: 0 },
             isGenerated: false,
+            isAnimation: false,
         };
         this.initialState = {
             isSolved: false,
             solutions: [],
             solution: null,
             isSearchBtn: true,
-            animalCursor: 1,
+            leadCursor: 1,
         };
         this.state = {
             ...this.initialState,
             ...this.initialMaze,
-            isAnimation: false,
             themes: Themes,
             activeTheme: 0,
         };
@@ -81,9 +81,9 @@ class App extends Component
                 array.push(array[0]);
             }
 
-            // Create pot and assign in 2D array 
+            // Create maze and assign in 2D array 
             // random values in range [0-3]
-            const pot = array.map(row => row.map(() => this.random(4)));
+            const maze = array.map(row => row.map(() => this.random(4)));
 
             // Create start and target points
             const start = {
@@ -98,15 +98,15 @@ class App extends Component
             }
             while ((target.row === start.row) || (target.col === start.col));
 
-            // Change the pot's start and target locations values to 0
+            // Change the maze's start and target locations values to 0
             // i.e. make sure both start and target points
             // are placed on a 'path' (and not on an 'obstacle')
-            pot[start.row][start.col] = 0;
-            pot[target.row][target.col] = 0;
+            maze[start.row][start.col] = 0;
+            maze[target.row][target.col] = 0;
 
             // Set state with results
             this.setState({
-                pot,
+                maze,
                 start,
                 target,
                 isGenerated: true
@@ -116,46 +116,51 @@ class App extends Component
 
     calculatePath()
     {
-        const { pot, start } = this.state;
-        // Variables
-        const height = pot.length;
-        const width = pot[0].length;
-        // Solution Array
-        const array = [[]];
-        for (let i = 0; i < width; i++)
+        const { maze, start } = this.state;
+
+        const height = maze.length;
+        const width = maze[0].length;
+
+        // Solution array
+        const arraySol = [[]];
+
+        // Fill solution array with 0
+        for (let i = 0; i < width; ++i)
         {
-            array[0].push(0);
+            arraySol[0].push(0);
         }
-        for (let i = 1; i < height; i++)
+        for (let i = 1; i < height; ++i)
         {
-            array.push(array[0]);
+            arraySol.push(arraySol[0]);
         }
+
         // Start search
-        this.searchPath(start.row, start.col, array, 0);
-        // Display result
-        const { solutions } = this.state;
-        const isSolved = (solutions.length > 0);
-        solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
-        const solution = (solutions.length > 0) ? solutions[0] : null;
-        this.setState({ isSearchBtn: false, isSolved, solution }, () =>
-        {
-            if (isSolved)
-            {
-                this.startAnimation();
-            }
-        });
+        this.searchPath(start, arraySol);
+
+        // // Display result
+        // const { solutions } = this.state;
+        // const isSolved = (solutions.length > 0);
+        // solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
+        // const solution = (solutions.length > 0) ? solutions[0] : null;
+        // this.setState({ isSearchBtn: false, isSolved, solution }, () =>
+        // {
+        //     if (isSolved)
+        //     {
+        //         this.startAnimation();
+        //     }
+        // });
     }
 
-    searchPath(row, column, prevArray, prevCount)
+    searchPath(pt, arraySol, prevCount = 0)
     {
-        const { pot, target } = this.state;
+        const { maze, target } = this.state;
         // CURRENT VALUE
-        const value = pot[row][column];
+        const value = maze[pt.row][pt.col];
         // VARIABLES
-        const height = (pot.length - 1);
-        const width = (pot[0].length - 1);
+        const height = (maze.length - 1);
+        const width = (maze[0].length - 1);
         const isPath = (value === 0);
-        const isNotVisited = (prevArray[row][column] === 0);
+        const isNotVisited = (arraySol[pt.row][pt.col] === 0);
 
         // VALUE IS 0
         if (isPath)
@@ -167,38 +172,45 @@ class App extends Component
                 const count = (prevCount + 1);
 
                 // KEEP TRACK OF VISITED VALUE
-                const updatedArray = prevArray.map(row => row.map(e => (e)));
-                updatedArray[row][column] = count;
+                const updatedArray = arraySol.map(row => row.map(e => (e)));
+                updatedArray[pt.row][pt.col] = count;
 
-                const isTarget = ((target.row === row) && (target.col === column));
+                const isTarget = ((target.row === pt.row) && (target.col === pt.col));
 
                 // IF IS AT TARGET
                 if (isTarget)
                 {
                     const { solutions } = this.state;
                     solutions.push({ array: updatedArray, pathLength: count });
-                    this.setState({ solutions });
-                } else
+                    // this.setState({ solutions });
+                    console.log(solutions);
+                }
+                else
                 {
+                    const nextPt = { row: pt.row, col: pt.col };
                     // TRY GO DOWN
-                    if (row < height)
+                    if (pt.row < height)
                     {
-                        this.searchPath((row + 1), column, updatedArray, count);
+                        nextPt.row = pt.row + 1;
+                        this.searchPath(nextPt, updatedArray, count);
                     }
                     // TRY GO UP
-                    if (row > 0)
+                    if (pt.row > 0)
                     {
-                        this.searchPath((row - 1), column, updatedArray, count);
+                        nextPt.row = pt.row - 1;
+                        this.searchPath(nextPt, updatedArray, count);
                     }
                     // TRY GO RIGHT
-                    if (column < width)
+                    if (pt.col < width)
                     {
-                        this.searchPath(row, (column + 1), updatedArray, count);
+                        nextPt.col = pt.col + 1;
+                        this.searchPath(nextPt, updatedArray, count);
                     }
                     // TRY GO LEFT
-                    if (column > 0)
+                    if (pt.col > 0)
                     {
-                        this.searchPath(row, (column - 1), updatedArray, count);
+                        nextPt.col = pt.col - 1;
+                        this.searchPath(nextPt, updatedArray, count);
                     }
                 }
             }
@@ -212,28 +224,28 @@ class App extends Component
      */
     changeBlockType(row, column)
     {
-        const pot = [...this.state.pot];
+        const maze = [...this.state.maze];
 
-        if (pot[row][column] >= 1)
+        if (maze[row][column] >= 1)
         {
             // Block type is an obstacle set it to path
-            pot[row][column] = 0;
+            maze[row][column] = 0;
         }
         else
         {
             // Block type is a path set it to obstacle
-            pot[row][column] = (this.random(4) + 1);
+            maze[row][column] = this.random(4) + 1;
         }
 
-        this.setState({ ...this.initialState, pot });
+        this.setState({ ...this.initialState, maze });
     }
 
     changeSize(value)
     {
-        const { pot } = this.state;
+        const { maze } = this.state;
 
-        const height = pot.length;
-        const width = pot[0].length;
+        const height = maze.length;
+        const width = maze[0].length;
 
         switch (value)
         {
@@ -268,33 +280,38 @@ class App extends Component
 
     startAnimation()
     {
-        const { solution } = this.state;
-        let i = 2;
-        this.setState({ isAnimation: true }, () =>
-        {
-            const counter = setInterval(() =>
-            {
-                if (i === solution.pathLength)
-                {
-                    clearInterval(counter);
-                    this.setState({ isAnimation: false });
-                }
-                this.setState({ animalCursor: i });
-                i++;
-            }, 700);
-        });
+        // // Get maze solution object
+        // const { solution } = this.state;
+
+        // // Start counter at 2 since lead is at 1
+        // let i = 2;
+
+        // this.setState({ isAnimation: true }, () =>
+        // {
+        //     // Each 700 ms moves the lead cursor
+        //     const counter = setInterval(() =>
+        //     {
+        //         if (i === solution.pathLength)
+        //         {
+        //             clearInterval(counter);
+        //             this.setState({ isAnimation: false });
+        //         }
+        //         this.setState({ leadCursor: i });
+        //         i++;
+        //     }, 700);
+        // });
     }
 
     render()
     {
         const {
-            pot,
+            maze,
             start,
             target,
             solution,
             isSolved,
             isSearchBtn,
-            animalCursor,
+            leadCursor,
             themes,
             activeTheme,
             isAnimation,
@@ -316,7 +333,7 @@ class App extends Component
                         }
                         <div className="maze" style={{ backgroundColor: theme.color.main }}>
                             {
-                                pot.map((row, index) =>
+                                maze.map((row, index) =>
                                     (
                                         <div key={index} className="row">
                                             {
@@ -342,9 +359,9 @@ class App extends Component
                                                         <div key={i}>
                                                             {
                                                                 (solution !== null && (solution.array[index][i] !== 0)) ?
-                                                                    (solution.array[index][i] === animalCursor) ?
+                                                                    (solution.array[index][i] === leadCursor) ?
                                                                         <span role="img" aria-label="emoji">{theme.emoji.animal}</span> :
-                                                                        (solution.array[index][i] < animalCursor) ?
+                                                                        (solution.array[index][i] < leadCursor) ?
                                                                             <span onClick={() => (!isAnimation && !isStart) && this.changeBlockType(index, i)} role="img" aria-label="emoji" style={{ opacity: 0.3 }}>{theme.emoji.animal}</span> :
                                                                             isTarget ?
                                                                                 <span role="img" aria-label="emoji">{theme.emoji.target}</span> :
@@ -406,7 +423,7 @@ class App extends Component
                                 <Settings
                                     changeSize={this.changeSize}
                                     theme={theme}
-                                    pot={pot}
+                                    maze={maze}
                                 />
 
                                 <div

@@ -17,11 +17,11 @@ const useStyles = makeStyles({
 
 export default function SettingsArea(props)
 {
-    const { pot, theme } = props;
+    const { maze, theme } = props;
     const classes = useStyles(theme);
 
-    const nbColumns = pot[0].length;
-    const nbRows = pot.length;
+    const nbColumns = maze[0].length;
+    const nbRows = maze.length;
 
     return (
         <div className="edit-container">
