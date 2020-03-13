@@ -1,4 +1,4 @@
-# **Maze Game**
+# Maze Game
 
 A simple nice-looking maze interface to play with, including various themes.
 
