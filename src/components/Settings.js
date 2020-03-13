@@ -11,8 +11,9 @@ const useStyles = makeStyles({
         alignItems: 'center',
         margin: 4,
         padding: 6,
-        backgroundColor: '#181818',
+        backgroundColor: '#121212',
         borderRadius: 30,
+        border: '1px solid #090909',
         color: '#383838',
         '&:hover': {
             color: theme => theme.color.main,
@@ -24,7 +25,8 @@ const useStyles = makeStyles({
     },
 });
 
-export default function SettingsArea(props) {
+export default function SettingsArea(props)
+{
     const { pot, theme } = props;
     const classes = useStyles(theme);
 

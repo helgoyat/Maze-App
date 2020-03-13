@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 // Components
-import ControlArea from './ControlArea';
-import SettingsArea from './SettingsArea';
+import Submit from './components/Submit';
+import Settings from './components/Settings';
 // Style
-import './App.css';
+import './assets/Styles.css';
 // Themes
-import Themes from './themes.js';
+import Themes from './assets/Themes.js';
 
-class App extends Component {
-    constructor() {
+class App extends Component
+{
+    constructor()
+    {
         super();
         this.initialMaze = {
             pot: null,
@@ -38,18 +40,23 @@ class App extends Component {
         this.startAnimation = this.startAnimation.bind(this);
     };
 
-    componentDidMount() {
+    componentDidMount()
+    {
         this.generateRandomMaze(5, 5);
     };
 
-    generateRandomMaze(width, height) {
-        this.setState({ ...this.initialState, ...this.initialMaze, solutions: [] }, () => {
+    generateRandomMaze(width, height)
+    {
+        this.setState({ ...this.initialState, ...this.initialMaze, solutions: [] }, () =>
+        {
             // Create array with width and height and only filled with 10
             const array = [[]];
-            for (let i = 0; i < width; i++) {
+            for (let i = 0; i < width; i++)
+            {
                 array[0].push(10);
             };
-            for (let i = 1; i < height; i++) {
+            for (let i = 1; i < height; i++)
+            {
                 array.push(array[0]);
             };
             // Randomly assigns numbers
@@ -60,7 +67,8 @@ class App extends Component {
                 col: Math.floor(Math.random() * width)
             };
             const target = {};
-            do {
+            do
+            {
                 target.row = Math.floor(Math.random() * height);
                 target.col = Math.floor(Math.random() * width);
             }
@@ -73,17 +81,20 @@ class App extends Component {
         });
     };
 
-    calculatePath = () => {
+    calculatePath = () =>
+    {
         const { pot, start } = this.state;
         // Variables
         const height = pot.length;
         const width = pot[0].length;
         // Solution Array
         const array = [[]];
-        for (let i = 0; i < width; i++) {
+        for (let i = 0; i < width; i++)
+        {
             array[0].push(0);
         };
-        for (let i = 1; i < height; i++) {
+        for (let i = 1; i < height; i++)
+        {
             array.push(array[0]);
         };
         // Start search
@@ -93,14 +104,17 @@ class App extends Component {
         const isSolved = (solutions.length > 0);
         solutions.sort(function (a, b) { return a.pathLength - b.pathLength });
         const solution = (solutions.length > 0) ? solutions[0] : null;
-        this.setState({ isSearchBtn: false, isSolved, solution }, () => {
-            if (isSolved) {
+        this.setState({ isSearchBtn: false, isSolved, solution }, () =>
+        {
+            if (isSolved)
+            {
                 this.startAnimation();
             }
         });
     };
 
-    searchPath(row, column, prevArray, prevCount) {
+    searchPath(row, column, prevArray, prevCount)
+    {
         const { pot, target } = this.state;
         // CURRENT VALUE
         const value = pot[row][column];
@@ -111,9 +125,11 @@ class App extends Component {
         const isNotVisited = (prevArray[row][column] === 0);
 
         // VALUE IS 0
-        if (isPath) {
+        if (isPath)
+        {
             // If not previously visited
-            if (isNotVisited) {
+            if (isNotVisited)
+            {
                 // NEXT COUNT
                 const count = (prevCount + 1);
 
@@ -124,25 +140,31 @@ class App extends Component {
                 const isTarget = ((target.row === row) && (target.col === column));
 
                 // IF IS AT TARGET
-                if (isTarget) {
+                if (isTarget)
+                {
                     const { solutions } = this.state;
                     solutions.push({ array: updatedArray, pathLength: count });
                     this.setState({ solutions });
-                } else {
+                } else
+                {
                     // TRY GO DOWN
-                    if (row < height) {
+                    if (row < height)
+                    {
                         this.searchPath((row + 1), column, updatedArray, count);
                     }
                     // TRY GO UP
-                    if (row > 0) {
+                    if (row > 0)
+                    {
                         this.searchPath((row - 1), column, updatedArray, count);
                     }
                     // TRY GO RIGHT
-                    if (column < width) {
+                    if (column < width)
+                    {
                         this.searchPath(row, (column + 1), updatedArray, count);
                     }
                     // TRY GO LEFT
-                    if (column > 0) {
+                    if (column > 0)
+                    {
                         this.searchPath(row, (column - 1), updatedArray, count);
                     }
                 };
@@ -150,47 +172,61 @@ class App extends Component {
         };
     };
 
-    changeBlockType(row, column) {
+    changeBlockType(row, column)
+    {
         const pot = [...this.state.pot];
-        if (pot[row][column] >= 1) {
+        if (pot[row][column] >= 1)
+        {
             pot[row][column] = 0;
-        } else {
+        } else
+        {
             const nb = Math.floor(Math.random() * 4) + 1;
             pot[row][column] = nb;
         };
         this.setState({ pot, ...this.initialState, solutions: [] });
     };
 
-    changeSize(operator, type) {
+    changeSize(operator, type)
+    {
         const { pot } = this.state;
         const height = pot.length;
         const width = pot[0].length;
         // ROW
-        if (type === 'row') {
-            if (operator === 'plus' && (height < 7)) {
+        if (type === 'row')
+        {
+            if (operator === 'plus' && (height < 7))
+            {
                 this.generateRandomMaze(width, (height + 1));
             };
-            if ((operator === 'minus') && (height > 2)) {
+            if ((operator === 'minus') && (height > 2))
+            {
                 this.generateRandomMaze(width, (height - 1));
             };
         };
         // COLUMN
-        if (type === 'col') {
-            if (operator === 'plus' && (width < 7)) {
+        if (type === 'col')
+        {
+            if (operator === 'plus' && (width < 7))
+            {
                 this.generateRandomMaze((width + 1), height);
             };
-            if ((operator === 'minus') && (width > 2)) {
+            if ((operator === 'minus') && (width > 2))
+            {
                 this.generateRandomMaze((width - 1), height);
             };
         };
     };
 
-    startAnimation() {
+    startAnimation()
+    {
         const { solution } = this.state;
         let i = 2;
-        this.setState({ isAnimation: true }, () => {
-            const counter = setInterval(() => {
-                if (i === solution.pathLength) {
+        this.setState({ isAnimation: true }, () =>
+        {
+            const counter = setInterval(() =>
+            {
+                if (i === solution.pathLength)
+                {
                     clearInterval(counter);
                     this.setState({ isAnimation: false });
                 };
@@ -200,7 +236,8 @@ class App extends Component {
         });
     };
 
-    render() {
+    render()
+    {
         const { pot, start, target, solution, isSolved, isSearchBtn, animalCursor, themes, activeTheme, isAnimation, isGenerated } = this.state;
 
         const theme = themes[activeTheme];
@@ -210,9 +247,10 @@ class App extends Component {
             <div className="App" style={{ background }}>
                 {
                     isGenerated &&
-                    <header className="App-header">
+                    <header className="App-header" style={{ height: isAnimation && '100vh' }}>
                         {
-                            !isAnimation && <h1>{theme.title} <font style={{ color: theme.color.main, textDecoration: 'overline' }}>Maze</font></h1>
+                            !isAnimation &&
+                            <h1><font style={{ color: theme.color.main, textShadow: '0px 2px 0px #000000ad', textDecoration: 'overline' }}>{theme.title}</font> Maze</h1>
                         }
                         <div className="maze" style={{ backgroundColor: theme.color.main }}>
                             {
@@ -220,11 +258,13 @@ class App extends Component {
                                     (
                                         <div key={index} className="row">
                                             {
-                                                row.map((e, i) => {
+                                                row.map((e, i) =>
+                                                {
                                                     const isStart = ((start.row === index) && (start.col === i));
                                                     const isTarget = ((target.row === index) && (target.col === i));
                                                     let obstacle = theme.emoji.obstacle_1;
-                                                    switch (e) {
+                                                    switch (e)
+                                                    {
                                                         case 2:
                                                             obstacle = theme.emoji.obstacle_2;
                                                             break;
@@ -268,23 +308,63 @@ class App extends Component {
                         {
                             !isAnimation &&
                             <React.Fragment>
-                                <ControlArea
+
+                                <Submit
                                     isSearchBtn={isSearchBtn}
                                     isSolved={isSolved}
                                     calculatePath={this.calculatePath}
                                     theme={theme}
                                 />
 
-                                <SettingsArea
+                                <div
+                                    style={{
+                                        marginTop: 20,
+                                        color: '#ffffff3d',
+                                        fontStyle: 'italic',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    Click on maze symbols (path or obstacles) to switch types.
+                                </div>
+
+                                <div
+                                    className="legend"
+                                    style={{
+                                        color: theme.color.main,
+                                        backgroundColor: theme.color.main + '2e',
+                                        border: `2px solid ${theme.color.main}2e`
+                                    }}
+                                >
+                                    <div>Lead {theme.emoji.animal}</div>
+                                    <div>Path {theme.emoji.path}</div>
+                                    <div>Obstacles {theme.emoji.obstacle_1} {theme.emoji.obstacle_2} {theme.emoji.obstacle_3}</div>
+                                    <div>Target {theme.emoji.target}</div>
+                                </div>
+
+                                <Settings
                                     changeSize={this.changeSize}
                                     theme={theme}
                                     pot={pot}
                                 />
 
-                                <div style={{ marginBottom: 20 }}>
+                                <div
+                                    style={{
+                                        color: '#808080',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    Select a theme
+                                </div>
+
+                                <div style={{ marginTop: 4, marginBottom: 20, borderTop: '1px solid #808080' }}>
                                     {
                                         themes.map((e, i) => (<font key={i} onClick={() => this.setState({ activeTheme: i, ...this.initialState })} className="theme">{e.title}</font>))
                                     }
+                                </div>
+
+                                <div className="github">
+                                    <i className="fas fa-code"></i>
+                                    <a href="https://github.com/helgoyat/maze-game" target="_blank" rel="noopener noreferrer">App Code Here</a>
                                 </div>
                             </React.Fragment>
                         }
