@@ -205,18 +205,27 @@ class App extends Component
         }
     }
 
+    /**
+     * Change/Switch maze block type at params coords
+     * @param {int} row 
+     * @param {int} column 
+     */
     changeBlockType(row, column)
     {
         const pot = [...this.state.pot];
+
         if (pot[row][column] >= 1)
         {
+            // Block type is an obstacle set it to path
             pot[row][column] = 0;
-        } else
-        {
-            const nb = Math.floor(Math.random() * 4) + 1;
-            pot[row][column] = nb;
         }
-        this.setState({ pot, ...this.initialState, solutions: [] });
+        else
+        {
+            // Block type is a path set it to obstacle
+            pot[row][column] = (this.random(4) + 1);
+        }
+
+        this.setState({ ...this.initialState, pot });
     }
 
     changeSize(value)
