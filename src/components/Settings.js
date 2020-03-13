@@ -46,5 +46,5 @@ export default function SettingsArea(props)
                 <i onClick={() => props.changeSize('plus', 'col')} className="fas fa-plus-circle"></i>
             </div>
         </div>
-    )
+    );
 }

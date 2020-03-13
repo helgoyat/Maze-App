@@ -38,12 +38,12 @@ class App extends Component
         this.changeBlockType = this.changeBlockType.bind(this);
         this.changeSize = this.changeSize.bind(this);
         this.startAnimation = this.startAnimation.bind(this);
-    };
+    }
 
     componentDidMount()
     {
         this.generateRandomMaze(5, 5);
-    };
+    }
 
     generateRandomMaze(width, height)
     {
@@ -54,11 +54,11 @@ class App extends Component
             for (let i = 0; i < width; i++)
             {
                 array[0].push(10);
-            };
+            }
             for (let i = 1; i < height; i++)
             {
                 array.push(array[0]);
-            };
+            }
             // Randomly assigns numbers
             const pot = array.map(row => row.map(() => Math.floor(Math.random() * 4)));
             // Create random start and target points
@@ -79,9 +79,9 @@ class App extends Component
 
             this.setState({ pot, start, target, isGenerated: true });
         });
-    };
+    }
 
-    calculatePath = () =>
+    calculatePath()
     {
         const { pot, start } = this.state;
         // Variables
@@ -92,17 +92,17 @@ class App extends Component
         for (let i = 0; i < width; i++)
         {
             array[0].push(0);
-        };
+        }
         for (let i = 1; i < height; i++)
         {
             array.push(array[0]);
-        };
+        }
         // Start search
         this.searchPath(start.row, start.col, array, 0);
         // Display result
         const { solutions } = this.state;
         const isSolved = (solutions.length > 0);
-        solutions.sort(function (a, b) { return a.pathLength - b.pathLength });
+        solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
         const solution = (solutions.length > 0) ? solutions[0] : null;
         this.setState({ isSearchBtn: false, isSolved, solution }, () =>
         {
@@ -111,7 +111,7 @@ class App extends Component
                 this.startAnimation();
             }
         });
-    };
+    }
 
     searchPath(row, column, prevArray, prevCount)
     {
@@ -167,10 +167,10 @@ class App extends Component
                     {
                         this.searchPath(row, (column - 1), updatedArray, count);
                     }
-                };
-            };
-        };
-    };
+                }
+            }
+        }
+    }
 
     changeBlockType(row, column)
     {
@@ -182,9 +182,9 @@ class App extends Component
         {
             const nb = Math.floor(Math.random() * 4) + 1;
             pot[row][column] = nb;
-        };
+        }
         this.setState({ pot, ...this.initialState, solutions: [] });
-    };
+    }
 
     changeSize(operator, type)
     {
@@ -197,25 +197,25 @@ class App extends Component
             if (operator === 'plus' && (height < 7))
             {
                 this.generateRandomMaze(width, (height + 1));
-            };
+            }
             if ((operator === 'minus') && (height > 2))
             {
                 this.generateRandomMaze(width, (height - 1));
-            };
-        };
+            }
+        }
         // COLUMN
         if (type === 'col')
         {
             if (operator === 'plus' && (width < 7))
             {
                 this.generateRandomMaze((width + 1), height);
-            };
+            }
             if ((operator === 'minus') && (width > 2))
             {
                 this.generateRandomMaze((width - 1), height);
-            };
-        };
-    };
+            }
+        }
+    }
 
     startAnimation()
     {
@@ -229,12 +229,12 @@ class App extends Component
                 {
                     clearInterval(counter);
                     this.setState({ isAnimation: false });
-                };
+                }
                 this.setState({ animalCursor: i });
                 i++;
             }, 700);
         });
-    };
+    }
 
     render()
     {
@@ -265,16 +265,16 @@ class App extends Component
                                                     let obstacle = theme.emoji.obstacle_1;
                                                     switch (e)
                                                     {
-                                                        case 2:
-                                                            obstacle = theme.emoji.obstacle_2;
-                                                            break;
-                                                        case 3:
-                                                            obstacle = theme.emoji.obstacle_3;
-                                                            break;
-                                                        default:
-                                                            obstacle = theme.emoji.obstacle_1;
-                                                            break;
-                                                    };
+                                                    case 2:
+                                                        obstacle = theme.emoji.obstacle_2;
+                                                        break;
+                                                    case 3:
+                                                        obstacle = theme.emoji.obstacle_3;
+                                                        break;
+                                                    default:
+                                                        obstacle = theme.emoji.obstacle_1;
+                                                        break;
+                                                    }
 
                                                     return (
                                                         <div key={i}>
@@ -297,7 +297,7 @@ class App extends Component
                                                                                 <span onClick={() => !isAnimation && this.changeBlockType(index, i)} role="img" aria-label="emoji">{theme.emoji.path}</span>
                                                             }
                                                         </div>
-                                                    )
+                                                    );
                                                 })
                                             }
                                         </div>

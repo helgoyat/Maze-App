@@ -25,5 +25,5 @@ export default function ControlArea(props)
                     <button onClick={props.calculatePath} className={classes.button}>Search</button>
             }
         </React.Fragment>
-    )
+    );
 }
