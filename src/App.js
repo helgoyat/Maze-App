@@ -20,7 +20,6 @@ class App extends Component
             isAnimation: false,
         };
         this.initialState = {
-            isSolved: false,
             solutions: [],
             solution: null,
             isSearchBtn: true,
@@ -131,36 +130,40 @@ class App extends Component
         }
         for (let i = 1; i < height; ++i)
         {
-            arraySol.push(arraySol[0]);
+            arraySol.push([...arraySol[0]]);
         }
 
         // Start search
-        this.searchPath(start, arraySol);
+        this.searchPath(start, arraySol, 0);
 
-        // // Display result
-        // const { solutions } = this.state;
-        // const isSolved = (solutions.length > 0);
-        // solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
-        // const solution = (solutions.length > 0) ? solutions[0] : null;
-        // this.setState({ isSearchBtn: false, isSolved, solution }, () =>
-        // {
-        //     if (isSolved)
-        //     {
-        //         this.startAnimation();
-        //     }
-        // });
+        // Display result
+        const { solutions } = this.state;
+
+        // Sort all solutions depending
+        solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
+
+        const solution = (solutions.length > 0) ? solutions[0] : null;
+        this.setState({ isSearchBtn: false, solution }, () =>
+        {
+            if (solution !== null)
+            {
+                this.startAnimation();
+            }
+        });
     }
 
-    searchPath(pt, arraySol, prevCount = 0)
+    searchPath(point, arraySol, count)
     {
         const { maze, target } = this.state;
-        // CURRENT VALUE
-        const value = maze[pt.row][pt.col];
+
         // VARIABLES
+        const value = maze[point.row][point.col];
+        // Maze
         const height = (maze.length - 1);
         const width = (maze[0].length - 1);
+        // Current
         const isPath = (value === 0);
-        const isNotVisited = (arraySol[pt.row][pt.col] === 0);
+        const isNotVisited = (arraySol[point.row][point.col] === 0);
 
         // VALUE IS 0
         if (isPath)
@@ -169,48 +172,50 @@ class App extends Component
             if (isNotVisited)
             {
                 // NEXT COUNT
-                const count = (prevCount + 1);
+                const nextCount = count + 1;
+                // TARGET
+                const isTarget = ((target.row === point.row) && (target.col === point.col));
 
                 // KEEP TRACK OF VISITED VALUE
-                const updatedArray = arraySol.map(row => row.map(e => (e)));
-                updatedArray[pt.row][pt.col] = count;
-
-                const isTarget = ((target.row === pt.row) && (target.col === pt.col));
+                const nextSolArray = arraySol.map(row => row.map(e => e));
+                nextSolArray[point.row][point.col] = nextCount;
 
                 // IF IS AT TARGET
                 if (isTarget)
                 {
                     const { solutions } = this.state;
-                    solutions.push({ array: updatedArray, pathLength: count });
-                    // this.setState({ solutions });
-                    console.log(solutions);
+                    solutions.push({ array: nextSolArray, pathLength: nextCount });
+                    this.setState({ solutions });
                 }
                 else
                 {
-                    const nextPt = { row: pt.row, col: pt.col };
                     // TRY GO DOWN
-                    if (pt.row < height)
+                    if (point.row < height)
                     {
-                        nextPt.row = pt.row + 1;
-                        this.searchPath(nextPt, updatedArray, count);
+                        const nextPt = { row: point.row, col: point.col };
+                        nextPt.row = point.row + 1;
+                        this.searchPath(nextPt, nextSolArray, nextCount);
                     }
                     // TRY GO UP
-                    if (pt.row > 0)
+                    if (point.row > 0)
                     {
-                        nextPt.row = pt.row - 1;
-                        this.searchPath(nextPt, updatedArray, count);
+                        const nextPt = { row: point.row, col: point.col };
+                        nextPt.row = point.row - 1;
+                        this.searchPath(nextPt, nextSolArray, nextCount);
                     }
                     // TRY GO RIGHT
-                    if (pt.col < width)
+                    if (point.col < width)
                     {
-                        nextPt.col = pt.col + 1;
-                        this.searchPath(nextPt, updatedArray, count);
+                        const nextPt = { row: point.row, col: point.col };
+                        nextPt.col = point.col + 1;
+                        this.searchPath(nextPt, nextSolArray, nextCount);
                     }
                     // TRY GO LEFT
-                    if (pt.col > 0)
+                    if (point.col > 0)
                     {
-                        nextPt.col = pt.col - 1;
-                        this.searchPath(nextPt, updatedArray, count);
+                        const nextPt = { row: point.row, col: point.col };
+                        nextPt.col = point.col - 1;
+                        this.searchPath(nextPt, nextSolArray, nextCount);
                     }
                 }
             }
@@ -224,20 +229,22 @@ class App extends Component
      */
     changeBlockType(row, column)
     {
-        const maze = [...this.state.maze];
+        const { maze } = this.state;
 
-        if (maze[row][column] >= 1)
+        const updatedMaze = maze.map(row => row.map(e => e));
+
+        if (updatedMaze[row][column] >= 1)
         {
             // Block type is an obstacle set it to path
-            maze[row][column] = 0;
+            updatedMaze[row][column] = 0;
         }
         else
         {
             // Block type is a path set it to obstacle
-            maze[row][column] = this.random(4) + 1;
+            updatedMaze[row][column] = this.random(4) + 1;
         }
 
-        this.setState({ ...this.initialState, maze });
+        this.setState({ ...this.initialState, solutions: [], maze: updatedMaze });
     }
 
     changeSize(value)
@@ -281,25 +288,25 @@ class App extends Component
     startAnimation()
     {
         // // Get maze solution object
-        // const { solution } = this.state;
+        const { solution } = this.state;
 
-        // // Start counter at 2 since lead is at 1
-        // let i = 2;
+        // Start counter at 2 since lead is at 1
+        let i = 2;
 
-        // this.setState({ isAnimation: true }, () =>
-        // {
-        //     // Each 700 ms moves the lead cursor
-        //     const counter = setInterval(() =>
-        //     {
-        //         if (i === solution.pathLength)
-        //         {
-        //             clearInterval(counter);
-        //             this.setState({ isAnimation: false });
-        //         }
-        //         this.setState({ leadCursor: i });
-        //         i++;
-        //     }, 700);
-        // });
+        this.setState({ isAnimation: true }, () =>
+        {
+            // Each 700 ms moves the lead cursor
+            const counter = setInterval(() =>
+            {
+                if (i === solution.pathLength)
+                {
+                    clearInterval(counter);
+                    this.setState({ isAnimation: false });
+                }
+                this.setState({ leadCursor: i });
+                i++;
+            }, 700);
+        });
     }
 
     render()
@@ -309,7 +316,6 @@ class App extends Component
             start,
             target,
             solution,
-            isSolved,
             isSearchBtn,
             leadCursor,
             themes,
@@ -317,6 +323,8 @@ class App extends Component
             isAnimation,
             isGenerated
         } = this.state;
+
+        // console.log(this.state.solutions);
 
         const theme = themes[activeTheme];
         const background = `linear-gradient(0deg, #272727 40%, #181818 50%, ` +
@@ -390,7 +398,7 @@ class App extends Component
 
                                 <Submit
                                     isSearchBtn={isSearchBtn}
-                                    isSolved={isSolved}
+                                    solution={solution}
                                     calculatePath={this.calculatePath}
                                     theme={theme}
                                 />

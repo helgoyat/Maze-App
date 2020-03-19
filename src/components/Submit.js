@@ -14,8 +14,10 @@ const useStyles = makeStyles({
 
 export default function ControlArea(props)
 {
-    const { isSearchBtn, isSolved, theme } = props;
+    const { isSearchBtn, solution, theme } = props;
+
     const classes = useStyles(theme);
+    const isSolved = (solution !== null);
 
     return (
         <React.Fragment>
