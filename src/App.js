@@ -31,17 +31,17 @@ class App extends Component
             themes: Themes,
             activeTheme: 0,
         };
-        this.generateMaze = this.generateMaze.bind(this);
+        this.generate = this.generate.bind(this);
         this.solve = this.solve.bind(this);
-        this.changeBlockType = this.changeBlockType.bind(this);
+        this.changeBlock = this.changeBlock.bind(this);
         this.changeSize = this.changeSize.bind(this);
-        this.startAnimation = this.startAnimation.bind(this);
+        this.animate = this.animate.bind(this);
     }
 
     componentDidMount()
     {
         // Generate a square maze (5 by 5)
-        this.generateMaze(5, 5);
+        this.generate(5, 5);
     }
 
     /**
@@ -61,7 +61,7 @@ class App extends Component
      * @param {int} width 
      * @param {int} height 
      */
-    generateMaze(width, height)
+    generate(width, height)
     {
         // Reset previous maze values
         this.setState({ ...this.initialState, ...this.initialMaze }, () =>
@@ -126,6 +126,7 @@ class App extends Component
         const limitWidth = (maze[0].length - 1);
 
         // Trace array
+        // i.e. maze buffer for each possible path to keep a trace
         const trace = [[]];
 
         // Fill trace array with 0
@@ -146,21 +147,17 @@ class App extends Component
             // Variables
             const value = maze[point.row][point.col];
             const isPath = (value === 0);
-            const isNotVisited = (trace[point.row][point.col] === 0);
+            const isVisited = (trace[point.row][point.col] > 0);
 
-            // VALUE IS 0
-            if (isPath && isNotVisited)
+            if (isPath && !isVisited)
             {
-                // NEXT COUNT
                 const nextCount = count + 1;
-                // TARGET
                 const isTarget = ((target.row === point.row) && (target.col === point.col));
 
-                // KEEP TRACK OF VISITED VALUE
+                // Tracks visited maze point
                 const nextTrace = trace.map(row => row.map(e => e));
                 nextTrace[point.row][point.col] = nextCount;
 
-                // IF IS AT TARGET
                 if (isTarget)
                 {
                     const sol = { array: nextTrace, pathLength: nextCount };
@@ -206,6 +203,7 @@ class App extends Component
         // Start search
         findPath(start, trace, 0);
 
+        // Handle result
         if (solutions.length > 0)
         {
             // Sort all solutions depending
@@ -213,7 +211,7 @@ class App extends Component
 
             this.setState({ isSearchBtn: false, solution: solutions[0] }, () =>
             {
-                this.startAnimation();
+                this.animate();
             });
         }
         else
@@ -227,7 +225,7 @@ class App extends Component
      * @param {int} row 
      * @param {int} column 
      */
-    changeBlockType(row, column)
+    changeBlock(row, column)
     {
         const { maze } = this.state;
 
@@ -263,25 +261,25 @@ class App extends Component
             case 0:
                 if (height > window.$minMazeSize)
                 {
-                    this.generateMaze(width, (height - 1));
+                    this.generate(width, (height - 1));
                 }
                 break;
             case 1:
                 if (height < window.$maxMazeSize)
                 {
-                    this.generateMaze(width, (height + 1));
+                    this.generate(width, (height + 1));
                 }
                 break;
             case 2:
                 if (width > window.$minMazeSize)
                 {
-                    this.generateMaze((width - 1), height);
+                    this.generate((width - 1), height);
                 }
                 break;
             case 3:
                 if (width < window.$maxMazeSize)
                 {
-                    this.generateMaze((width + 1), height);
+                    this.generate((width + 1), height);
                 }
                 break;
             default:
@@ -292,7 +290,7 @@ class App extends Component
     /**
      * Animates the lead cursor to move step by step to target
      */
-    startAnimation()
+    animate()
     {
         // Get maze solution object
         const { solution } = this.state;
@@ -375,18 +373,18 @@ class App extends Component
                                                                     (solution.array[index][i] === cursor) ?
                                                                         <span role="img" aria-label="emoji">{theme.emoji.animal}</span> :
                                                                         (solution.array[index][i] < cursor) ?
-                                                                            <span onClick={() => (!isAnimation && !isStart) && this.changeBlockType(index, i)} role="img" aria-label="emoji" style={{ opacity: 0.3 }}>{theme.emoji.animal}</span> :
+                                                                            <span onClick={() => (!isAnimation && !isStart) && this.changeBlock(index, i)} role="img" aria-label="emoji" style={{ opacity: 0.3 }}>{theme.emoji.animal}</span> :
                                                                             isTarget ?
                                                                                 <span role="img" aria-label="emoji">{theme.emoji.target}</span> :
-                                                                                <span onClick={() => !isAnimation && this.changeBlockType(index, i)} role="img" aria-label="emoji">{theme.emoji.path}</span>
+                                                                                <span onClick={() => !isAnimation && this.changeBlock(index, i)} role="img" aria-label="emoji">{theme.emoji.path}</span>
                                                                     :
                                                                     (e >= 1) ?
-                                                                        <span onClick={() => !isAnimation && this.changeBlockType(index, i)} role="img" aria-label="emoji">{obstacle}</span> :
+                                                                        <span onClick={() => !isAnimation && this.changeBlock(index, i)} role="img" aria-label="emoji">{obstacle}</span> :
                                                                         isStart ?
                                                                             <span role="img" aria-label="emoji">{theme.emoji.animal}</span> :
                                                                             isTarget ?
                                                                                 <span role="img" aria-label="emoji">{theme.emoji.target}</span> :
-                                                                                <span onClick={() => !isAnimation && this.changeBlockType(index, i)} role="img" aria-label="emoji">{theme.emoji.path}</span>
+                                                                                <span onClick={() => !isAnimation && this.changeBlock(index, i)} role="img" aria-label="emoji">{theme.emoji.path}</span>
                                                             }
                                                         </div>
                                                     );
