@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 
 // Global variables
-window.$maxSize = 7;
-window.$minSize = 2;
+window.$maxMazeSize = 7;
+window.$minMazeSize = 2;
 
 ReactDOM.render(<App />, document.getElementById('root'));

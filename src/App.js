@@ -20,10 +20,10 @@ class App extends Component
             isAnimation: false,
         };
         this.initialState = {
-            solutions: [],
+            solutions: null,
             solution: null,
             isSearchBtn: true,
-            leadCursor: 1,
+            cursor: 1,
         };
         this.state = {
             ...this.initialState,
@@ -32,8 +32,7 @@ class App extends Component
             activeTheme: 0,
         };
         this.generateMaze = this.generateMaze.bind(this);
-        this.calculatePath = this.calculatePath.bind(this);
-        this.searchPath = this.searchPath.bind(this);
+        this.solve = this.solve.bind(this);
         this.changeBlockType = this.changeBlockType.bind(this);
         this.changeSize = this.changeSize.bind(this);
         this.startAnimation = this.startAnimation.bind(this);
@@ -113,63 +112,44 @@ class App extends Component
         });
     }
 
-    calculatePath()
+    /**
+     * Solve the maze by finding the shortest path to target
+     */
+    solve()
     {
-        const { maze, start } = this.state;
+        const { maze, start, target } = this.state;
 
+        // Maze
         const height = maze.length;
         const width = maze[0].length;
+        const limitHeight = (maze.length - 1);
+        const limitWidth = (maze[0].length - 1);
 
-        // Solution array
-        const arraySol = [[]];
+        // Trace array
+        const trace = [[]];
 
-        // Fill solution array with 0
+        // Fill trace array with 0
         for (let i = 0; i < width; ++i)
         {
-            arraySol[0].push(0);
+            trace[0].push(0);
         }
         for (let i = 1; i < height; ++i)
         {
-            arraySol.push([...arraySol[0]]);
+            trace.push([...trace[0]]);
         }
 
-        // Start search
-        this.searchPath(start, arraySol, 0);
+        // Solution array
+        const solutions = [];
 
-        // Display result
-        const { solutions } = this.state;
-
-        // Sort all solutions depending
-        solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
-
-        const solution = (solutions.length > 0) ? solutions[0] : null;
-        this.setState({ isSearchBtn: false, solution }, () =>
+        function findPath(point, trace, count)
         {
-            if (solution !== null)
-            {
-                this.startAnimation();
-            }
-        });
-    }
+            // Variables
+            const value = maze[point.row][point.col];
+            const isPath = (value === 0);
+            const isNotVisited = (trace[point.row][point.col] === 0);
 
-    searchPath(point, arraySol, count)
-    {
-        const { maze, target } = this.state;
-
-        // VARIABLES
-        const value = maze[point.row][point.col];
-        // Maze
-        const height = (maze.length - 1);
-        const width = (maze[0].length - 1);
-        // Current
-        const isPath = (value === 0);
-        const isNotVisited = (arraySol[point.row][point.col] === 0);
-
-        // VALUE IS 0
-        if (isPath)
-        {
-            // If not previously visited
-            if (isNotVisited)
+            // VALUE IS 0
+            if (isPath && isNotVisited)
             {
                 // NEXT COUNT
                 const nextCount = count + 1;
@@ -177,48 +157,68 @@ class App extends Component
                 const isTarget = ((target.row === point.row) && (target.col === point.col));
 
                 // KEEP TRACK OF VISITED VALUE
-                const nextSolArray = arraySol.map(row => row.map(e => e));
-                nextSolArray[point.row][point.col] = nextCount;
+                const nextTrace = trace.map(row => row.map(e => e));
+                nextTrace[point.row][point.col] = nextCount;
 
                 // IF IS AT TARGET
                 if (isTarget)
                 {
-                    const { solutions } = this.state;
-                    solutions.push({ array: nextSolArray, pathLength: nextCount });
-                    this.setState({ solutions });
+                    const sol = { array: nextTrace, pathLength: nextCount };
+                    solutions.push(sol);
                 }
                 else
                 {
                     // TRY GO DOWN
-                    if (point.row < height)
+                    if (point.row < limitHeight)
                     {
-                        const nextPt = { row: point.row, col: point.col };
-                        nextPt.row = point.row + 1;
-                        this.searchPath(nextPt, nextSolArray, nextCount);
+                        const nextPoint = { row: point.row, col: point.col };
+                        nextPoint.row = point.row + 1;
+                        findPath(nextPoint, nextTrace, nextCount);
                     }
+
                     // TRY GO UP
                     if (point.row > 0)
                     {
-                        const nextPt = { row: point.row, col: point.col };
-                        nextPt.row = point.row - 1;
-                        this.searchPath(nextPt, nextSolArray, nextCount);
+                        const nextPoint = { row: point.row, col: point.col };
+                        nextPoint.row = point.row - 1;
+                        findPath(nextPoint, nextTrace, nextCount);
                     }
+
                     // TRY GO RIGHT
-                    if (point.col < width)
+                    if (point.col < limitWidth)
                     {
-                        const nextPt = { row: point.row, col: point.col };
-                        nextPt.col = point.col + 1;
-                        this.searchPath(nextPt, nextSolArray, nextCount);
+                        const nextPoint = { row: point.row, col: point.col };
+                        nextPoint.col = point.col + 1;
+                        findPath(nextPoint, nextTrace, nextCount);
                     }
+
                     // TRY GO LEFT
                     if (point.col > 0)
                     {
-                        const nextPt = { row: point.row, col: point.col };
-                        nextPt.col = point.col - 1;
-                        this.searchPath(nextPt, nextSolArray, nextCount);
+                        const nextPoint = { row: point.row, col: point.col };
+                        nextPoint.col = point.col - 1;
+                        findPath(nextPoint, nextTrace, nextCount);
                     }
                 }
             }
+        }
+
+        // Start search
+        findPath(start, trace, 0);
+
+        if (solutions.length > 0)
+        {
+            // Sort all solutions depending
+            solutions.sort(function (a, b) { return a.pathLength - b.pathLength; });
+
+            this.setState({ isSearchBtn: false, solution: solutions[0] }, () =>
+            {
+                this.startAnimation();
+            });
+        }
+        else
+        {
+            this.setState({ isSearchBtn: false, solution: null });
         }
     }
 
@@ -244,9 +244,13 @@ class App extends Component
             updatedMaze[row][column] = this.random(4) + 1;
         }
 
-        this.setState({ ...this.initialState, solutions: [], maze: updatedMaze });
+        this.setState({ ...this.initialState, maze: updatedMaze });
     }
 
+    /**
+     * Modify maze size (row size and column size)
+     * @param {int} value 
+     */
     changeSize(value)
     {
         const { maze } = this.state;
@@ -257,25 +261,25 @@ class App extends Component
         switch (value)
         {
             case 0:
-                if (height > window.$minSize)
+                if (height > window.$minMazeSize)
                 {
                     this.generateMaze(width, (height - 1));
                 }
                 break;
             case 1:
-                if (height < window.$maxSize)
+                if (height < window.$maxMazeSize)
                 {
                     this.generateMaze(width, (height + 1));
                 }
                 break;
             case 2:
-                if (width > window.$minSize)
+                if (width > window.$minMazeSize)
                 {
                     this.generateMaze((width - 1), height);
                 }
                 break;
             case 3:
-                if (width < window.$maxSize)
+                if (width < window.$maxMazeSize)
                 {
                     this.generateMaze((width + 1), height);
                 }
@@ -285,9 +289,12 @@ class App extends Component
         }
     }
 
+    /**
+     * Animates the lead cursor to move step by step to target
+     */
     startAnimation()
     {
-        // // Get maze solution object
+        // Get maze solution object
         const { solution } = this.state;
 
         // Start counter at 2 since lead is at 1
@@ -303,7 +310,7 @@ class App extends Component
                     clearInterval(counter);
                     this.setState({ isAnimation: false });
                 }
-                this.setState({ leadCursor: i });
+                this.setState({ cursor: i });
                 i++;
             }, 700);
         });
@@ -317,14 +324,12 @@ class App extends Component
             target,
             solution,
             isSearchBtn,
-            leadCursor,
+            cursor,
             themes,
             activeTheme,
             isAnimation,
             isGenerated
         } = this.state;
-
-        // console.log(this.state.solutions);
 
         const theme = themes[activeTheme];
         const background = `linear-gradient(0deg, #272727 40%, #181818 50%, ` +
@@ -367,9 +372,9 @@ class App extends Component
                                                         <div key={i}>
                                                             {
                                                                 (solution !== null && (solution.array[index][i] !== 0)) ?
-                                                                    (solution.array[index][i] === leadCursor) ?
+                                                                    (solution.array[index][i] === cursor) ?
                                                                         <span role="img" aria-label="emoji">{theme.emoji.animal}</span> :
-                                                                        (solution.array[index][i] < leadCursor) ?
+                                                                        (solution.array[index][i] < cursor) ?
                                                                             <span onClick={() => (!isAnimation && !isStart) && this.changeBlockType(index, i)} role="img" aria-label="emoji" style={{ opacity: 0.3 }}>{theme.emoji.animal}</span> :
                                                                             isTarget ?
                                                                                 <span role="img" aria-label="emoji">{theme.emoji.target}</span> :
@@ -399,7 +404,7 @@ class App extends Component
                                 <Submit
                                     isSearchBtn={isSearchBtn}
                                     solution={solution}
-                                    calculatePath={this.calculatePath}
+                                    solve={this.solve}
                                     theme={theme}
                                 />
 

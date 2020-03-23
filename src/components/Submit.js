@@ -24,7 +24,7 @@ export default function ControlArea(props)
             {
                 !isSearchBtn ?
                     <div className={isSolved ? 'result-yes' : 'result-no'}>{isSolved ? 'Solved!' : 'No path were found.'}</div> :
-                    <button onClick={props.calculatePath} className={classes.button}>Search</button>
+                    <button onClick={props.solve} className={classes.button}>Search</button>
             }
         </React.Fragment>
     );
