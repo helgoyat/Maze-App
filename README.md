@@ -2,6 +2,8 @@
 
 A simple nice-looking maze interface to play with, including various themes.
 
+View App on Heroku [>> HERE](https://vast-reaches-00907.herokuapp.com/)
+
 ## Concept
 
 The maze is basically a rectangle filled with emojis. 
